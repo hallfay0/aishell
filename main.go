@@ -34,7 +34,6 @@ const (
 
 type ChatBot struct {
 	executor *agents.Executor
-	memory   *memory.ConversationWindowBuffer
 	llm      llms.Model
 	ctx      context.Context
 }
@@ -78,7 +77,6 @@ func NewChatBot(ctx context.Context) (*ChatBot, error) {
 	// 根据环境变量决定是否启用调试模式
 	var executorOptions []agents.Option
 	executorOptions = append(executorOptions, agents.WithMaxIterations(MaxExecutorIterations))
-	// 关键修复：Executor 也需要同样的 memory 实例
 	executorOptions = append(executorOptions, agents.WithMemory(conversationMemory))
 
 	if os.Getenv("AISHELL_DEBUG") == "true" {
@@ -91,7 +89,6 @@ func NewChatBot(ctx context.Context) (*ChatBot, error) {
 
 	return &ChatBot{
 		executor: executor,
-		memory:   conversationMemory,
 		llm:      llm,
 		ctx:      ctx,
 	}, nil
@@ -120,16 +117,6 @@ func printWelcome() {
 
 	// 身份介绍
 	fmt.Println("👨‍💻 我是您的智能终端助手，专门帮助您解决各种系统和技术问题")
-	fmt.Println()
-
-	yellow.Println("🎯 我能为您做什么:")
-	fmt.Println("  🔧 系统管理 - 软件安装、配置查看、文件操作")
-	fmt.Println("  🧮 数据计算 - 数学运算、数据分析、公式求解")
-	fmt.Println("  🔍 信息搜索 - 技术文档、解决方案、最新资讯")
-	fmt.Println("  💡 问题诊断 - 系统问题分析、性能优化建议")
-	fmt.Println("  📝 代码协助 - 代码分析、开发环境配置")
-	fmt.Println("  📄 文件读取 - 按行号范围读取文件内容")
-	fmt.Println("  📝 文件写入 - 创建和编辑文本文件")
 	fmt.Println()
 
 	yellow.Println("💬 交互方式:")
