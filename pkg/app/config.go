@@ -1,5 +1,7 @@
 package app
 
+import "fmt"
+
 // Config 应用配置
 type Config struct {
 	// ConversationBufferSize 对话窗口缓冲大小，控制保持的对话轮数
@@ -29,32 +31,45 @@ func DefaultConfig() *Config {
 	return &Config{
 		ConversationBufferSize: 100,
 		MaxExecutorIterations:  30,
-		HistoryFile:           "/tmp/aishell_history",
-		Prompt:               "💻 智能终端> ",
-		DebugMode:            false,
-		HasSearchAPI:         false,
-		OpenAIBaseURL:        "", // 默认为空，使用OpenAI官方端点
+		HistoryFile:            "/tmp/aishell_history",
+		Prompt:                 "💻 智能终端> ",
+		DebugMode:              false,
+		HasSearchAPI:           false,
+		OpenAIBaseURL:          "", // 默认为空，使用OpenAI官方端点
 	}
 }
 
 // LoadConfig 从环境变量加载配置
 func LoadConfig() *Config {
 	config := DefaultConfig()
-	
+
 	// 从环境变量读取配置
 	if isDebugEnabled() {
 		config.DebugMode = true
 	}
-	
+
 	if hasSearchAPI() {
 		config.HasSearchAPI = true
 	}
-	
+
 	// 读取OpenAI BaseURL配置
 	if baseURL := getEnv("OPENAI_BASE_URL"); baseURL != "" {
 		config.OpenAIBaseURL = baseURL
 	}
-	
+
+	// 添加调试日志
+	if config.DebugMode {
+		apiKey := getEnv("OPENAI_API_KEY")
+		if apiKey != "" {
+			fmt.Printf("🔍 [DEBUG] OpenAI API Key: %s... (前10个字符)\n", apiKey[:min(10, len(apiKey))])
+		} else {
+			fmt.Printf("🔍 [DEBUG] OpenAI API Key: (未设置)\n")
+		}
+		fmt.Printf("🔍 [DEBUG] OpenAI Base URL: %s\n", config.OpenAIBaseURL)
+		fmt.Printf("🔍 [DEBUG] Has Search API: %v\n", config.HasSearchAPI)
+		fmt.Printf("🔍 [DEBUG] Debug Mode: %v\n", config.DebugMode)
+	}
+
 	return config
 }
 
@@ -89,4 +104,12 @@ func getEnv(key string) string {
 var getOSEnv = func(key string) string {
 	// 默认实现，可以在测试中替换
 	return ""
+}
+
+// min 返回两个整数中的较小值
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

@@ -36,6 +36,16 @@ func NewChatBot(ctx context.Context, config *Config) (*ChatBot, error) {
 	var llm llms.Model
 	var err error
 
+	// 添加调试日志
+	if config.DebugMode {
+		fmt.Printf("🔍 [DEBUG] 开始初始化OpenAI LLM...\n")
+		if config.OpenAIBaseURL != "" {
+			fmt.Printf("🔍 [DEBUG] 使用自定义BaseURL: %s\n", config.OpenAIBaseURL)
+		} else {
+			fmt.Printf("🔍 [DEBUG] 使用默认OpenAI端点\n")
+		}
+	}
+
 	// 如果有自定义BaseURL，使用它
 	if config.OpenAIBaseURL != "" {
 		llm, err = openai.New(
@@ -47,7 +57,14 @@ func NewChatBot(ctx context.Context, config *Config) (*ChatBot, error) {
 	}
 
 	if err != nil {
+		if config.DebugMode {
+			fmt.Printf("🔍 [DEBUG] OpenAI LLM初始化失败: %v\n", err)
+		}
 		return nil, fmt.Errorf("初始化LLM失败: %w", err)
+	}
+
+	if config.DebugMode {
+		fmt.Printf("🔍 [DEBUG] OpenAI LLM初始化成功\n")
 	}
 
 	// 初始化对话窗口缓冲内存 (保持最近N轮对话)
@@ -79,12 +96,25 @@ func NewChatBot(ctx context.Context, config *Config) (*ChatBot, error) {
 
 // ProcessInput 处理用户输入
 func (cb *ChatBot) ProcessInput(input string) (string, error) {
+	// 添加调试日志
+	if cb.config.DebugMode {
+		fmt.Printf("🔍 [DEBUG] 开始处理用户输入: %s\n", input)
+		fmt.Printf("🔍 [DEBUG] 调用chains.Run...\n")
+	}
+
 	// 调用执行器处理输入
 	result, err := chains.Run(cb.ctx, cb.executor, input)
 	if err != nil {
 		// ConversationalAgent 现在应该足够稳定，直接返回错误
 		// 如果频繁出现解析错误，可以考虑重新启用 fallback 机制
+		if cb.config.DebugMode {
+			fmt.Printf("🔍 [DEBUG] chains.Run调用失败: %v\n", err)
+		}
 		return "", fmt.Errorf("处理输入失败: %w", err)
+	}
+
+	if cb.config.DebugMode {
+		fmt.Printf("🔍 [DEBUG] chains.Run调用成功，结果长度: %d\n", len(result))
 	}
 
 	return result, nil
