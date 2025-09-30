@@ -19,6 +19,9 @@ type Config struct {
 
 	// HasSearchAPI 是否有搜索API
 	HasSearchAPI bool
+
+	// OpenAIBaseURL OpenAI API基础URL，用于自定义端点
+	OpenAIBaseURL string
 }
 
 // DefaultConfig 返回默认配置
@@ -30,6 +33,7 @@ func DefaultConfig() *Config {
 		Prompt:               "💻 智能终端> ",
 		DebugMode:            false,
 		HasSearchAPI:         false,
+		OpenAIBaseURL:        "", // 默认为空，使用OpenAI官方端点
 	}
 }
 
@@ -44,6 +48,11 @@ func LoadConfig() *Config {
 	
 	if hasSearchAPI() {
 		config.HasSearchAPI = true
+	}
+	
+	// 读取OpenAI BaseURL配置
+	if baseURL := getEnv("OPENAI_BASE_URL"); baseURL != "" {
+		config.OpenAIBaseURL = baseURL
 	}
 	
 	return config
@@ -62,6 +71,11 @@ func hasSearchAPI() bool {
 // hasOpenAIAPI 检查是否有OpenAI API配置
 func HasOpenAIAPI() bool {
 	return getEnv("OPENAI_API_KEY") != ""
+}
+
+// getOpenAIBaseURL 获取OpenAI BaseURL
+func getOpenAIBaseURL() string {
+	return getEnv("OPENAI_BASE_URL")
 }
 
 // getEnv 安全获取环境变量

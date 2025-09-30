@@ -76,6 +76,7 @@ aishell 是一个基于 Go 语言和 LangChain 的智能终端助手，集成 Op
 | 命令行交互 | readline | latest | 交互式输入处理 |
 | 颜色输出 | fatih/color | v1.17.0 | 终端彩色输出 |
 | 搜索API | SerpAPI | optional | 网络搜索功能 |
+| 自定义端点 | OpenAI BaseURL | optional | 支持Azure OpenAI等自定义端点 |
 
 ### 设计模式
 
@@ -181,10 +182,11 @@ type ChatBot struct {
 - 错误恢复机制
 
 #### 2.2 Config (`config.go`)
-**职责**: 
+**职责**:
 - 应用配置管理
 - 环境变量处理
 - 默认值设置
+- 自定义端点配置
 
 **配置项**:
 ```go
@@ -195,7 +197,19 @@ type Config struct {
     Prompt                string // 命令行提示符
     DebugMode             bool   // 调试模式
     HasSearchAPI          bool   // 搜索API可用性
+    OpenAIBaseURL         string // OpenAI自定义端点
 }
+```
+
+**自定义端点支持**:
+```go
+// 支持Azure OpenAI、代理服务等自定义端点
+if config.OpenAIBaseURL != "" {
+    llm, err = openai.New(
+        openai.WithBaseURL(config.OpenAIBaseURL),
+    )
+}
+```
 ```
 
 ### 3. CLI 交互层 (`pkg/cli/`)

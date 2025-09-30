@@ -67,6 +67,10 @@ cp env.example .env
 # OpenAI API 密钥 (必需)
 export OPENAI_API_KEY="your_openai_api_key_here"
 
+# OpenAI API 基础URL (可选，用于自定义端点)
+# 支持 Azure OpenAI、代理服务等自定义端点
+export OPENAI_BASE_URL="https://your-resource.openai.azure.com"
+
 # SerpAPI 密钥 (可选，用于网络搜索)
 export SERPAPI_API_KEY="your_serpapi_key_here"
 
@@ -87,6 +91,7 @@ source .env
 | `ConversationBufferSize` | 100 | 对话记忆窗口大小 |
 | `MaxExecutorIterations` | 30 | 最大推理迭代次数 |
 | `AISHELL_DEBUG` | false | 调试模式开关 |
+| `OPENAI_BASE_URL` | "" | OpenAI API自定义端点（可选） |
 
 ## 🚀 使用方法
 
@@ -248,6 +253,13 @@ go tool cover -html=coverage.out -o coverage.html
 
 **Q: 提示 "初始化LLM失败"**
 A: 请检查 `OPENAI_API_KEY` 环境变量是否正确设置
+
+**Q: 如何使用 Azure OpenAI 或其他自定义端点？**
+A: 设置 `OPENAI_BASE_URL` 环境变量，例如：
+```bash
+export OPENAI_BASE_URL="https://your-resource.openai.azure.com"
+export OPENAI_API_KEY="your-azure-api-key"
+```
 
 **Q: 搜索功能不可用**
 A: 需要设置 `SERPAPI_API_KEY` 环境变量启用搜索功能

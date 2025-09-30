@@ -33,7 +33,19 @@ func NewChatBot(ctx context.Context, config *Config) (*ChatBot, error) {
 	}
 
 	// 初始化OpenAI LLM
-	llm, err := openai.New()
+	var llm llms.Model
+	var err error
+
+	// 如果有自定义BaseURL，使用它
+	if config.OpenAIBaseURL != "" {
+		llm, err = openai.New(
+			openai.WithBaseURL(config.OpenAIBaseURL),
+		)
+	} else {
+		// 使用默认的OpenAI端点
+		llm, err = openai.New()
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("初始化LLM失败: %w", err)
 	}
@@ -112,7 +124,7 @@ func createToolsList(config *Config) []tools.Tool {
 // createExecutorOptions 创建执行器选项
 func createExecutorOptions(config *Config, conversationMemory *memory.ConversationWindowBuffer) []agents.Option {
 	var executorOptions []agents.Option
-	
+
 	executorOptions = append(executorOptions, agents.WithMaxIterations(config.MaxExecutorIterations))
 	executorOptions = append(executorOptions, agents.WithMemory(conversationMemory))
 
